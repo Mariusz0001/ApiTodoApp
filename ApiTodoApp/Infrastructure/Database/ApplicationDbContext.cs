@@ -1,0 +1,22 @@
+﻿using Microsoft.EntityFrameworkCore;
+
+namespace ApiTodoApp.Infrastructure.Database
+{
+    public class ApplicationDbContext : DbContext
+    {
+        static readonly string connectionString = "Server=localhost; User ID=root; Password=Sklepikarz123!; Database=todoapp-db";//todo move cn to appsettings or vault
+
+        public DbSet<PersonalTask> Tasks { get; set; }
+
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        {
+            optionsBuilder.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString));
+        }
+    }
+
+    public class PersonalTask
+    {
+        public int Id { get; set; }
+        public string Name { get; set; }
+    }
+}
