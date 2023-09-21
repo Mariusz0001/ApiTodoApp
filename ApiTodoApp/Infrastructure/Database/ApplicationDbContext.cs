@@ -6,7 +6,7 @@ namespace ApiTodoApp.Infrastructure.Database
     {
         static readonly string connectionString = "Server=localhost; User ID=root; Password=Sklepikarz123!; Database=todoapp-db";//todo move cn to appsettings or vault
 
-        public DbSet<PersonalTask> Tasks { get; set; }
+        public DbSet<PersonalTask>? PersonalTasks { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -14,9 +14,5 @@ namespace ApiTodoApp.Infrastructure.Database
         }
     }
 
-    public class PersonalTask
-    {
-        public int Id { get; set; }
-        public string Name { get; set; }
-    }
+    public record PersonalTask(Guid Id, string? Name);
 }
