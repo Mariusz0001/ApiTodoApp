@@ -11,11 +11,19 @@ namespace ApiTodoApp.Repositories
 
         }
 
-        public IEnumerable<PersonalTask>? Get()
+        public IQueryable<PersonalTask>? Get()
         {
             var personalTasks = DbContext.PersonalTasks;
-            return personalTasks is not null ? personalTasks.ToList() : null;
+            return personalTasks is not null ? personalTasks.OrderByDescending(p => p.CreationDate).ThenByDescending(p => p.Status) : null;
         }
+
+        public IQueryable<PersonalTask>? GetByType(string type)
+        {
+            var personalTasks = this.Get();
+            return personalTasks is not null ? personalTasks
+                .Where(p => p.Status == (PersonalTaskStatus)Enum.Parse(typeof(PersonalTaskStatus), type)) : null;
+        }
+
         public Guid Add(AddTaskDto dto)
         {
             var id = Guid.NewGuid();

@@ -5,7 +5,8 @@ namespace ApiTodoApp.Repositories
 {
     public interface IPersonalTasksRepository
     {
-        IEnumerable<PersonalTask>? Get();
+        IQueryable<PersonalTask>? Get();
+        IQueryable<PersonalTask>? GetByType(string type);
         Guid Add(AddTaskDto dto);
     }
 }

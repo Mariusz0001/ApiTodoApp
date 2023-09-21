@@ -33,6 +33,16 @@ namespace ApiTodoApp.Controllers
             return response?.Count() > 0 ? _mapper.Map<IEnumerable<PersonalTaskDto>>(response) : new List<PersonalTaskDto>();
         }
 
+        [HttpGet("{type}")]
+        public IEnumerable<PersonalTaskDto> Get([FromRoute] string type)
+        {
+            _logger.LogInformation("METHOD: GET, PersonalTasksController");//todo loging request response
+            var response = _repository.GetByType(type);
+
+            return response?.Count() > 0 ? _mapper.Map<IEnumerable<PersonalTaskDto>>(response) : new List<PersonalTaskDto>();
+        }
+
+
         [HttpPost("add")]
         public Guid AddTask([FromBody] AddTaskDto addTaskDto)
         {
