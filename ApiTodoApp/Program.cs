@@ -19,6 +19,15 @@ builder.Services.AddScoped<IPersonalTasksRepository, PersonalTasksRepository>();
 
 builder.Services.AddDbContext<ApplicationDbContext>();
 
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(builder =>
+    {
+        builder.SetIsOriginAllowed(origin => new Uri(origin).Host == "localhost").AllowAnyHeader().AllowAnyMethod();
+    });
+});
+
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -29,6 +38,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseCors();
 
 //app.UseAuthentication();
 //app.UseAuthorization();

@@ -14,5 +14,12 @@ namespace ApiTodoApp.Infrastructure.Database
         }
     }
 
-    public record PersonalTask(Guid Id, string? Name);
+    public record PersonalTask(Guid Id, string? Name, DateTime CreationDate, PersonalTaskStatus Status);
+
+    public enum PersonalTaskStatus
+    {
+        TO_DO,
+        IN_PROGRESS,
+        COMPLETE
+    }
 }

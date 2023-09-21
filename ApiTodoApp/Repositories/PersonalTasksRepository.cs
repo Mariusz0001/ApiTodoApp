@@ -20,7 +20,7 @@ namespace ApiTodoApp.Repositories
         {
             var id = Guid.NewGuid();
 
-            DbContext.Add(new PersonalTask(id, dto.Name));
+            DbContext.Add(new PersonalTask(id, dto.Name, DateTime.Now, PersonalTaskStatus.TO_DO));
             DbContext.SaveChanges();
 
             return id;
