@@ -27,10 +27,20 @@ namespace ApiTodoApp.Controllers
         [HttpGet]
         public IEnumerable<PersonalTaskDto> Get()
         {
-            _logger.LogInformation("METHOD: Get, PersonalTasksController");//todo loging request response
+            _logger.LogInformation("METHOD: GET, PersonalTasksController");//todo loging request response
             var response = _repository.Get();
 
             return response?.Count() > 0 ? _mapper.Map<IEnumerable<PersonalTaskDto>>(response) : new List<PersonalTaskDto>();
+        }
+
+        [HttpPost("add")]
+        public Guid AddTask([FromBody] AddTaskDto addTaskDto)
+        {
+            _logger.LogInformation("METHOD: POST, PersonalTasksController");//todo loging request response
+
+            var id = _repository.Add(addTaskDto);
+
+            return id;
         }
     }
 }

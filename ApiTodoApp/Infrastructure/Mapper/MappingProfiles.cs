@@ -8,7 +8,7 @@ namespace ApiTodoApp.Infrastructure.Mapper
     {
         public MappingProfiles()
         {
-            CreateMap<IEnumerable<PersonalTask>, IEnumerable<PersonalTaskDto>>();
+            CreateMap<PersonalTask, PersonalTaskDto>();
         }
     }
 }

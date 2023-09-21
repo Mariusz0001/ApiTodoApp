@@ -14,9 +14,5 @@ namespace ApiTodoApp.Infrastructure.Database
         }
     }
 
-    public class PersonalTask
-    {
-        public Guid Id { get; set; }
-        public string? Name { get; set; }
-    }
+    public record PersonalTask(Guid Id, string? Name);
 }
