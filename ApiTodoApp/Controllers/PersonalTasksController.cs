@@ -52,5 +52,12 @@ namespace ApiTodoApp.Controllers
 
             return id;
         }
+
+        [HttpPost("move")]
+        public void MoveTask([FromBody] MoveTaskDto dto)
+        {
+            _logger.LogInformation("METHOD: POST, PersonalTasksController");//todo loging request response
+            _repository.Move(dto);
+        }
     }
 }

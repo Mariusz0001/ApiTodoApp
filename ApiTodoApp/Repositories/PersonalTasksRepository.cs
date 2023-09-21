@@ -33,6 +33,19 @@ namespace ApiTodoApp.Repositories
 
             return id;
         }
+
+        public void Move(MoveTaskDto dto)
+        {
+            var personalTask = DbContext.PersonalTasks?.FirstOrDefault(p => p.Id == dto.Id);
+
+            if (personalTask is null)
+                throw new ArgumentException($"Task {dto.Id} has been not found");
+
+            personalTask.Status = (PersonalTaskStatus)Enum.Parse(typeof(PersonalTaskStatus), dto.Status);
+
+            DbContext.PersonalTasks?.Update(personalTask);
+            DbContext.SaveChanges();            
+        }
     }
 }
 

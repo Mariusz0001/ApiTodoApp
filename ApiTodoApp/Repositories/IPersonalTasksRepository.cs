@@ -8,5 +8,6 @@ namespace ApiTodoApp.Repositories
         IQueryable<PersonalTask>? Get();
         IQueryable<PersonalTask>? GetByType(string type);
         Guid Add(AddTaskDto dto);
+        void Move(MoveTaskDto dto);
     }
 }
