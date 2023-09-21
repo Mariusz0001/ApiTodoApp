@@ -28,7 +28,7 @@ namespace ApiTodoApp.Repositories
         {
             var id = Guid.NewGuid();
 
-            DbContext.Add(new PersonalTask(id, dto.Name, DateTime.Now, PersonalTaskStatus.TO_DO));
+            DbContext.Add(new PersonalTask(id, dto.Name, DateTime.Now, (PersonalTaskStatus)Enum.Parse(typeof(PersonalTaskStatus), dto.Type)));
             DbContext.SaveChanges();
 
             return id;
