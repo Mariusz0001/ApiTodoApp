@@ -41,7 +41,9 @@ namespace ApiTodoApp.Repositories
             if (personalTask is null)
                 throw new ArgumentException($"Task {dto.Id} has been not found");
 
-            personalTask.Status = (PersonalTaskStatus)Enum.Parse(typeof(PersonalTaskStatus), dto.Status);
+            var status = (int)personalTask.Status < 2 ? personalTask.Status + 1 : personalTask.Status;
+
+            personalTask.Status = status;
 
             DbContext.PersonalTasks?.Update(personalTask);
             DbContext.SaveChanges();            

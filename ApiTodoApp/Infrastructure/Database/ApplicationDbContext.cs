@@ -29,8 +29,8 @@ namespace ApiTodoApp.Infrastructure.Database
 
     public enum PersonalTaskStatus
     {
-        TO_DO,
-        IN_PROGRESS,
-        COMPLETE
+        TO_DO = 0,
+        IN_PROGRESS = 1,
+        COMPLETE = 2
     }
 }

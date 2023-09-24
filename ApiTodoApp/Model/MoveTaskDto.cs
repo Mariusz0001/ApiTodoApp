@@ -1,4 +1,4 @@
 ﻿namespace ApiTodoApp.Model
 {
-    public record MoveTaskDto(Guid Id, string Status);
+    public record MoveTaskDto(Guid Id);
 }
