@@ -36,10 +36,7 @@ namespace ApiTodoApp.Repositories
 
         public void Move(MoveTaskDto dto)
         {
-            var personalTask = DbContext.PersonalTasks?.FirstOrDefault(p => p.Id == dto.Id);
-
-            if (personalTask is null)
-                throw new ArgumentException($"Task {dto.Id} has been not found");
+            PersonalTask? personalTask = GetTask(dto.Id);
 
             var status = (int)personalTask.Status < 2 ? personalTask.Status + 1 : personalTask.Status;
 
@@ -47,6 +44,28 @@ namespace ApiTodoApp.Repositories
 
             DbContext.PersonalTasks?.Update(personalTask);
             DbContext.SaveChanges();            
+        }
+
+        public void Edit(EditTaskDto dto)
+        {
+            PersonalTask? personalTask = GetTask(dto.Id);
+
+            if (String.IsNullOrEmpty(dto.Name))
+                throw new ArgumentException($"Error while task editing - {nameof(dto.Name)} is empty");
+
+            personalTask.Name = dto.Name;
+
+            DbContext.PersonalTasks?.Update(personalTask);
+            DbContext.SaveChanges();
+        }
+
+        private PersonalTask GetTask(Guid id)
+        {
+            var personalTask = DbContext.PersonalTasks?.FirstOrDefault(p => p.Id == id);
+
+            if (personalTask is null)
+                throw new ArgumentException($"Task {id} has been not found");
+            return personalTask;
         }
     }
 }
