@@ -59,5 +59,12 @@ namespace ApiTodoApp.Controllers
             _logger.LogInformation("METHOD: POST, PersonalTasksController");//todo loging request response
             _repository.Move(dto);
         }
+
+        [HttpPost("edit")]
+        public void EditTask([FromBody] EditTaskDto dto)
+        {
+            _logger.LogInformation("METHOD: POST, PersonalTasksController");//todo loging request response
+            _repository.Edit(dto);
+        }
     }
 }
