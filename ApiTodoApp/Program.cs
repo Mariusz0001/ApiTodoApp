@@ -14,9 +14,9 @@ var jwtOptions = builder.Configuration
 
 builder.Services.AddSingleton(jwtOptions);
 
-var authSecrets = builder.Configuration
-    .GetSection("AuthSecrets")
-    .Get<AuthSecrets>();
+var authSecrets = new AuthSecrets(builder.Configuration
+    .GetSection("AuthSecrets.UserName").Get<string>(), builder.Configuration
+    .GetSection("AuthSecrets.Password").Get<string>());
 
 builder.Services.AddSingleton(authSecrets);
 
