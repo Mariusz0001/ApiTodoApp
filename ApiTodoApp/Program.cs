@@ -1,14 +1,45 @@
+using ApiTodoApp.Infrastructure.Authentication;
 using ApiTodoApp.Infrastructure.Database;
 using ApiTodoApp.Repositories;
-using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Identity.Web;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
-//builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
- // todo consider authentication  .AddMicrosoftIdentityWebApi(builder.Configuration.GetSection("AzureAd"));
+var jwtOptions = builder.Configuration
+    .GetSection("JwtOptions")
+    .Get<JwtOptions>();
+
+builder.Services.AddSingleton(jwtOptions);
+
+var authSecrets = new AuthSecrets(builder.Configuration
+    .GetSection("AuthSecrets.UserName").Get<string>(), builder.Configuration
+    .GetSection("AuthSecrets.Password").Get<string>());
+
+builder.Services.AddSingleton(authSecrets);
+
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(opts =>
+    {
+        byte[] signingKeyBytes = Encoding.UTF8
+            .GetBytes(jwtOptions.SigningKey);
+
+        opts.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            ValidIssuer = jwtOptions.Issuer,
+            ValidAudience = jwtOptions.Audience,
+            IssuerSigningKey = new SymmetricSecurityKey(signingKeyBytes)
+        };
+    });
+
+builder.Services.AddAuthorization();
+
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
@@ -45,9 +76,12 @@ app.UseHttpsRedirection();
 
 app.UseCors();
 
-//app.UseAuthentication();
-//app.UseAuthorization();
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.MapControllers();
+
+app.MapPost("/tokens/connect", (HttpContext ctx, JwtOptions jwtOptions, AuthSecrets authSecrets)
+    => TokenEndpoint.Connect(ctx, jwtOptions, authSecrets));
 
 app.Run();
