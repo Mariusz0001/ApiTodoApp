@@ -8,14 +8,7 @@ using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
-var authSecrets = new AuthSecrets(builder.Configuration
-    .GetSection("AuthSecrets.UserName").Get<string>(), builder.Configuration
-    .GetSection("AuthSecrets.Password").Get<string>(), builder.Configuration
-    .GetSection("AuthSecrets.Issuer").Get<string>(), builder.Configuration
-    .GetSection("AuthSecrets.Audience").Get<string>(), builder.Configuration
-    .GetSection("AuthSecrets.ExpirationSeconds").Get<double>(), builder.Configuration
-    .GetSection("AuthSecrets.SigningKey").Get<string>());
-
+var authSecrets = builder.Configuration.GetSection("AuthSecrets").Get<AuthSecrets>();
 builder.Services.AddSingleton(authSecrets);
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
