@@ -9,7 +9,6 @@ namespace ApiTodoApp.Infrastructure.Authentication
     {
         public static async Task<IResult> Connect(
                      HttpContext ctx,
-                     JwtOptions jwtOptions,
                      AuthSecrets authSecrets)
         {
             if (ctx.Request.ContentType != "application/x-www-form-urlencoded")
@@ -23,9 +22,9 @@ namespace ApiTodoApp.Infrastructure.Authentication
             if (!IsValidLogin(formCollection, userName, authSecrets))
                 return Results.BadRequest(new { Error = "Invalid Request" });
 
-            var tokenExpiration = TimeSpan.FromSeconds(jwtOptions.ExpirationSeconds);
+            var tokenExpiration = TimeSpan.FromSeconds(authSecrets.ExpirationSeconds!);
             var accessToken = TokenEndpoint.CreateAccessToken(
-                jwtOptions,
+                authSecrets,
                 userName,
                 tokenExpiration,
                 new[] { "read_todo", "create_todo" });
@@ -40,12 +39,12 @@ namespace ApiTodoApp.Infrastructure.Authentication
         }
 
         static string CreateAccessToken(
-                    JwtOptions jwtOptions,
+                    AuthSecrets authSecrets,
                     string username,
                     TimeSpan expiration,
                     string[] permissions)
         {
-            var keyBytes = Encoding.UTF8.GetBytes(jwtOptions.SigningKey);
+            var keyBytes = Encoding.UTF8.GetBytes(authSecrets.SigningKey);
             var symmetricKey = new SymmetricSecurityKey(keyBytes);
 
             var signingCredentials = new SigningCredentials(
@@ -56,15 +55,15 @@ namespace ApiTodoApp.Infrastructure.Authentication
             {
                 new Claim("sub", username),
                 new Claim("name", username),
-                new Claim("aud", jwtOptions.Audience)
+                new Claim("aud", authSecrets.Audience)
             };
 
             var roleClaims = permissions.Select(x => new Claim("role", x));
             claims.AddRange(roleClaims);
 
             var token = new JwtSecurityToken(
-                issuer: jwtOptions.Issuer,
-                audience: jwtOptions.Audience,
+                issuer: authSecrets.Issuer,
+                audience: authSecrets.Audience,
                 claims: claims,
                 expires: DateTime.Now.Add(expiration),
                 signingCredentials: signingCredentials);

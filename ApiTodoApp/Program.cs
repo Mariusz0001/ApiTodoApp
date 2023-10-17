@@ -8,15 +8,13 @@ using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
-var jwtOptions = builder.Configuration
-    .GetSection("JwtOptions")
-    .Get<JwtOptions>();
-
-builder.Services.AddSingleton(jwtOptions);
-
 var authSecrets = new AuthSecrets(builder.Configuration
     .GetSection("AuthSecrets.UserName").Get<string>(), builder.Configuration
-    .GetSection("AuthSecrets.Password").Get<string>());
+    .GetSection("AuthSecrets.Password").Get<string>(), builder.Configuration
+    .GetSection("AuthSecrets.Issuer").Get<string>(), builder.Configuration
+    .GetSection("AuthSecrets.Audience").Get<string>(), builder.Configuration
+    .GetSection("AuthSecrets.ExpirationSeconds").Get<double>(), builder.Configuration
+    .GetSection("AuthSecrets.SigningKey").Get<string>());
 
 builder.Services.AddSingleton(authSecrets);
 
@@ -24,7 +22,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(opts =>
     {
         byte[] signingKeyBytes = Encoding.UTF8
-            .GetBytes(jwtOptions.SigningKey);
+            .GetBytes(authSecrets.SigningKey);
 
         opts.TokenValidationParameters = new TokenValidationParameters
         {
@@ -32,8 +30,8 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidateAudience = true,
             ValidateLifetime = true,
             ValidateIssuerSigningKey = true,
-            ValidIssuer = jwtOptions.Issuer,
-            ValidAudience = jwtOptions.Audience,
+            ValidIssuer = authSecrets.Issuer,
+            ValidAudience = authSecrets.Audience,
             IssuerSigningKey = new SymmetricSecurityKey(signingKeyBytes)
         };
     });
@@ -81,7 +79,7 @@ app.UseAuthorization();
 
 app.MapControllers();
 
-app.MapPost("/tokens/connect", (HttpContext ctx, JwtOptions jwtOptions, AuthSecrets authSecrets)
-    => TokenEndpoint.Connect(ctx, jwtOptions, authSecrets));
+app.MapPost("/tokens/connect", (HttpContext ctx, AuthSecrets authSecrets)
+    => TokenEndpoint.Connect(ctx, authSecrets));
 
 app.Run();
