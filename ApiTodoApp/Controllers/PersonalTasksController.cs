@@ -1,14 +1,15 @@
 using ApiTodoApp.Model;
 using ApiTodoApp.Repositories;
 using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ApiTodoApp.Controllers
 {
-    //[Authorize]
+    [Authorize]
     [ApiController]
     [Route("[controller]")]
-    //[RequiredScope(RequiredScopesConfigurationKey = "AzureAd:Scopes")]
+
     public class PersonalTasksController : ControllerBase
     {
         private readonly ILogger<PersonalTasksController> _logger;
