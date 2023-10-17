@@ -14,6 +14,12 @@ var jwtOptions = builder.Configuration
 
 builder.Services.AddSingleton(jwtOptions);
 
+var authSecrets = builder.Configuration
+    .GetSection("AuthSecrets")
+    .Get<AuthSecrets>();
+
+builder.Services.AddSingleton(authSecrets);
+
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(opts =>
     {
@@ -75,7 +81,7 @@ app.UseAuthorization();
 
 app.MapControllers();
 
-app.MapPost("/tokens/connect", (HttpContext ctx, JwtOptions jwtOptions)
-    => TokenEndpoint.Connect(ctx, jwtOptions));
+app.MapPost("/tokens/connect", (HttpContext ctx, JwtOptions jwtOptions, AuthSecrets authSecrets)
+    => TokenEndpoint.Connect(ctx, jwtOptions, authSecrets));
 
 app.Run();

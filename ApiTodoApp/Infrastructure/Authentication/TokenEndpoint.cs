@@ -9,7 +9,8 @@ namespace ApiTodoApp.Infrastructure.Authentication
     {
         public static async Task<IResult> Connect(
                      HttpContext ctx,
-                     JwtOptions jwtOptions)
+                     JwtOptions jwtOptions,
+                     AuthSecrets authSecrets)
         {
             if (ctx.Request.ContentType != "application/x-www-form-urlencoded")
                 return Results.BadRequest(new { Error = "Invalid Request" });
@@ -19,10 +20,8 @@ namespace ApiTodoApp.Infrastructure.Authentication
             if (formCollection.TryGetValue("username", out var userName) == false)
                 return Results.BadRequest(new { Error = "Invalid Request" });
 
-            if (!IsValidLogin(formCollection, userName))
+            if (!IsValidLogin(formCollection, userName, authSecrets))
                 return Results.BadRequest(new { Error = "Invalid Request" });
-
-
 
             var tokenExpiration = TimeSpan.FromSeconds(jwtOptions.ExpirationSeconds);
             var accessToken = TokenEndpoint.CreateAccessToken(
@@ -74,19 +73,12 @@ namespace ApiTodoApp.Infrastructure.Authentication
             return rawToken;
         }
 
-        private static bool IsValidLogin(IFormCollection formCollection, string userName)
+        private static bool IsValidLogin(IFormCollection formCollection, string userName, AuthSecrets authSecrets)
         {
-            if (formCollection.TryGetValue("grant_type", out var grantType) == false)
-            {
-                return false;
-            }
-
             if (formCollection.TryGetValue("password", out var password) == false)
-            {
                 return false;
-            }
 
-
+            return userName == authSecrets.UserName && password == authSecrets.Password ? true : false;
         }
     }
 }
