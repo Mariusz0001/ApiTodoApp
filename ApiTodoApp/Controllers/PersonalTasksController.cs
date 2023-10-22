@@ -6,9 +6,9 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace ApiTodoApp.Controllers
 {
-    [Authorize]
     [ApiController]
     [Route("[controller]")]
+    [Authorize]
 
     public class PersonalTasksController : ControllerBase
     {
