@@ -1,4 +1,5 @@
 ﻿using ApiTodoApp.Infrastructure.Database;
+using ApiTodoApp.Infrastructure.Database.Entities;
 using ApiTodoApp.Infrastructure.Repository;
 using ApiTodoApp.Model;
 
@@ -43,7 +44,7 @@ namespace ApiTodoApp.Repositories
             personalTask.Status = status;
 
             DbContext.PersonalTasks?.Update(personalTask);
-            DbContext.SaveChanges();            
+            DbContext.SaveChanges();
         }
 
         public void Edit(EditTaskDto dto)

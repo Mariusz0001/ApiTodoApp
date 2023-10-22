@@ -1,4 +1,4 @@
-﻿using ApiTodoApp.Infrastructure.Database;
+﻿using ApiTodoApp.Infrastructure.Database.Entities;
 using ApiTodoApp.Model;
 
 namespace ApiTodoApp.Repositories
