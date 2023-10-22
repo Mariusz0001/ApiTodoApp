@@ -1,48 +1,60 @@
 using ApiTodoApp.Infrastructure.Authentication;
 using ApiTodoApp.Infrastructure.Database;
+using ApiTodoApp.Model.User;
 using ApiTodoApp.Repositories;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
-var authSecrets = builder.Configuration.GetSection("AuthSecrets").Get<AuthSecrets>();
-builder.Services.AddSingleton(authSecrets);
-
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddJwtBearer(opts =>
-    {
-        byte[] signingKeyBytes = Encoding.UTF8
-            .GetBytes(authSecrets.SigningKey);
-
-        opts.TokenValidationParameters = new TokenValidationParameters
-        {
-            ValidateIssuer = true,
-            ValidateAudience = true,
-            ValidateLifetime = true,
-            ValidateIssuerSigningKey = true,
-            ValidIssuer = authSecrets.Issuer,
-            ValidAudience = authSecrets.Audience,
-            IssuerSigningKey = new SymmetricSecurityKey(signingKeyBytes)
-        };
-    });
-
-builder.Services.AddAuthorization();
-
-
-builder.Services.AddControllers();
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
-
-builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
-
-builder.Services.AddScoped<IPersonalTasksRepository, PersonalTasksRepository>();
-
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
 {
     options.UseMySql(builder.Configuration.GetConnectionString("DbConnection"), ServerVersion.AutoDetect(builder.Configuration.GetConnectionString("DbConnection")));
+});
+
+var authSecrets = builder.Configuration.GetSection("AuthSecrets").Get<AuthSecrets>();
+builder.Services.AddSingleton(authSecrets);
+
+builder.Services.AddIdentity<User, IdentityRole>()
+    .AddEntityFrameworkStores<ApplicationDbContext>()
+    .AddDefaultTokenProviders();
+
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+}).AddJwtBearer(options => options.TokenValidationParameters =
+    new Microsoft.IdentityModel.Tokens.TokenValidationParameters
+    {
+        ValidateIssuer = true,
+        ValidateLifetime = true,
+        ValidateAudience = true,
+        ValidateIssuerSigningKey = true,
+        ValidIssuer = authSecrets.Issuer,
+        ValidAudience = authSecrets.Audience,
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(authSecrets.SigningKey))
+    });
+
+builder.Services.AddControllers();
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new OpenApiInfo { Title = "Todo app API", Version = "v1" });
+    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        Description = @"JWT Authorization header using the Bearer scheme. \r\n\r\n 
+                      Enter 'Bearer' [space] and then your token in the text input below.
+                      \r\n\r\nExample: 'Bearer 12345abcdef'",
+        Name = "Authorization",
+        In = ParameterLocation.Header,
+        Type = SecuritySchemeType.ApiKey,
+        Scheme = "Bearer"
+    });
 });
 
 builder.Services.AddCors(options =>
@@ -52,6 +64,12 @@ builder.Services.AddCors(options =>
         builder.SetIsOriginAllowed(origin => new Uri(origin).Host == "localhost").AllowAnyHeader().AllowAnyMethod();
     });
 });
+
+builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+
+builder.Services.AddScoped<IPersonalTasksRepository, PersonalTasksRepository>();
+
+builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
 
 
 var app = builder.Build();
@@ -63,16 +81,13 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+app.UseCors();
 app.UseHttpsRedirection();
 
-app.UseCors();
-
 app.UseAuthentication();
+app.UseRouting();
 app.UseAuthorization();
 
 app.MapControllers();
-
-app.MapPost("/tokens/connect", (HttpContext ctx, AuthSecrets authSecrets)
-    => TokenEndpoint.Connect(ctx, authSecrets));
 
 app.Run();
