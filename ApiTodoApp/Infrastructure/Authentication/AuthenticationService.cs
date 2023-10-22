@@ -58,33 +58,40 @@ namespace ApiTodoApp.Infrastructure.Authentication
                 throw new ArgumentException($"Unable to authenticate user {request.Username}");
             }
 
-            var authClaims = new List<Claim>
+            var authClaims = new ClaimsIdentity(new[]
         {
-            new(ClaimTypes.Name, user.UserName),
-            new(ClaimTypes.Email, user.Email),
-            new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-        };
+            new Claim("Name", user.UserName),
+            new Claim("Email", user.Email)
+        });
 
-            var token = GetToken(authClaims);
 
-            return new JwtSecurityTokenHandler().WriteToken(token);
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var token = GenerateToken(authClaims);
+
+
+            return token;
         }
 
-        private JwtSecurityToken GetToken(IEnumerable<Claim> authClaims)
+        private string GenerateToken(ClaimsIdentity authClaims)
         {
+
             if (_authSecrets?.SigningKey is null)
                 throw new NullReferenceException($"{nameof(_authSecrets.SigningKey)} is null,check configuration");
 
-            var authSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_authSecrets.SigningKey));
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var key = Encoding.ASCII.GetBytes(_authSecrets.SigningKey);
+            var expirationDate = DateTime.UtcNow.AddSeconds(_authSecrets.ExpirationSeconds);
 
-            var token = new JwtSecurityToken(
-                // issuer: _authSecrets.Issuer,
-                //  audience: _authSecrets.Audience,
-                expires: DateTime.Now.Add(TimeSpan.FromSeconds(_authSecrets.ExpirationSeconds)),
-                claims: authClaims,
-                signingCredentials: new SigningCredentials(authSigningKey, SecurityAlgorithms.HmacSha256));
-
-            return token;
+            var tokenDescriptor = new SecurityTokenDescriptor
+            {
+                Subject = authClaims,
+                Expires = expirationDate,
+                Issuer = _authSecrets.Issuer,
+                Audience = _authSecrets.Audience,
+                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
+            };
+            var token = tokenHandler.CreateToken(tokenDescriptor);
+            return tokenHandler.WriteToken(token);
         }
 
         private string GetErrorsText(IEnumerable<IdentityError> errors)
