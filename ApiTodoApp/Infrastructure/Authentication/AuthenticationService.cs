@@ -21,11 +21,12 @@ namespace ApiTodoApp.Infrastructure.Authentication
         public async Task<string> Register(RegisterRequest request)
         {
             var userByEmail = await _userManager.FindByEmailAsync(request.Email);
+            if (userByEmail is not null)
+                throw new ArgumentException($"User with email {request.Email} already exists.");
+
             var userByUsername = await _userManager.FindByNameAsync(request.UserName);
-            if (userByEmail is not null || userByUsername is not null)
-            {
-                throw new ArgumentException($"User with email {request.Email} or username {request.UserName} already exists.");
-            }
+            if (userByUsername is not null)
+                throw new ArgumentException($"Username { request.UserName} is already taken.");
 
             User user = new()
             {

@@ -1,4 +1,5 @@
 ﻿using ApiTodoApp.Infrastructure.Authentication;
+using ApiTodoApp.Model;
 using ApiTodoApp.Model.User;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -23,9 +24,16 @@ namespace ApiTodoApp.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> Login([FromBody] LoginRequest request)
         {
-            var response = await _authenticationService.Login(request);
+            try
+            {
+                var response = await _authenticationService.Login(request);
 
-            return Ok(response);
+                return Ok(new UserDto(response));
+            }
+            catch (ArgumentException aex)
+            {
+                return BadRequest(new ErrorDto(aex.Message));
+            }
         }
 
         [AllowAnonymous]
@@ -35,9 +43,15 @@ namespace ApiTodoApp.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> Register([FromBody] RegisterRequest request)
         {
-            var response = await _authenticationService.Register(request);
-
-            return Ok(response);
+            try
+            {
+                var response = await _authenticationService.Register(request);
+                return Ok(new UserDto(response));
+            }
+            catch (ArgumentException aex)
+            {
+                return BadRequest(new ErrorDto(aex.Message));
+            }
         }
     }
 }
