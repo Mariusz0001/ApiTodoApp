@@ -1,3 +1,4 @@
+using ApiTodoApp.Helpers;
 using ApiTodoApp.Model;
 using ApiTodoApp.Repositories;
 using AutoMapper;
@@ -15,57 +16,61 @@ namespace ApiTodoApp.Controllers
         private readonly ILogger<PersonalTasksController> _logger;
         private readonly IPersonalTasksRepository _repository;
         private readonly IMapper _mapper;
+        private readonly UserHelper _userHelper;
 
         public PersonalTasksController(ILogger<PersonalTasksController> logger,
                                        IPersonalTasksRepository repository,
-                                       IMapper mapper)
+                                       IMapper mapper,
+                                       UserHelper userHelper)
         {
             _logger = logger;
             _repository = repository;
             _mapper = mapper;
+            _userHelper = userHelper;
         }
 
         [HttpGet]
-        public IEnumerable<PersonalTaskDto> Get()
+        public async Task<IEnumerable<PersonalTaskDto>> Get()
         {
             _logger.LogInformation("METHOD: GET, PersonalTasksController");//todo loging request response
-            var response = _repository.Get();
+            var response = _repository.Get(await _userHelper.GetUser(User));
 
             return response?.Count() > 0 ? _mapper.Map<IEnumerable<PersonalTaskDto>>(response) : new List<PersonalTaskDto>();
         }
 
         [HttpGet("{type}")]
-        public IEnumerable<PersonalTaskDto> Get([FromRoute] string type)
+        public async Task<IEnumerable<PersonalTaskDto>> GetAsync([FromRoute] string type)
         {
             _logger.LogInformation("METHOD: GET, PersonalTasksController");//todo loging request response
-            var response = _repository.GetByType(type);
+            var response = _repository.GetByType(type, await _userHelper.GetUser(User));
 
             return response?.Count() > 0 ? _mapper.Map<IEnumerable<PersonalTaskDto>>(response) : new List<PersonalTaskDto>();
         }
 
 
         [HttpPost("add")]
-        public Guid AddTask([FromBody] AddTaskDto addTaskDto)
+        public async Task<Guid> AddTaskAsync([FromBody] AddTaskDto addTaskDto)
         {
             _logger.LogInformation("METHOD: POST, PersonalTasksController");//todo loging request response
 
-            var id = _repository.Add(addTaskDto);
+            var id = _repository.Add(addTaskDto, await _userHelper.GetUser(User));
 
             return id;
         }
 
+
         [HttpPost("move")]
-        public void MoveTask([FromBody] MoveTaskDto dto)
+        public async Task MoveTaskAsync([FromBody] MoveTaskDto dto)
         {
             _logger.LogInformation("METHOD: POST, PersonalTasksController");//todo loging request response
-            _repository.Move(dto);
+            _repository.Move(dto, await _userHelper.GetUser(User));
         }
 
         [HttpPost("edit")]
-        public void EditTask([FromBody] EditTaskDto dto)
+        public async Task EditTaskAsync([FromBody] EditTaskDto dto)
         {
             _logger.LogInformation("METHOD: POST, PersonalTasksController");//todo loging request response
-            _repository.Edit(dto);
+            _repository.Edit(dto, await _userHelper.GetUser(User));
         }
     }
 }

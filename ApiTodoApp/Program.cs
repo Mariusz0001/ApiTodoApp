@@ -1,3 +1,4 @@
+using ApiTodoApp.Helpers;
 using ApiTodoApp.Infrastructure.Authentication;
 using ApiTodoApp.Infrastructure.Database;
 using ApiTodoApp.Model.User;
@@ -70,7 +71,7 @@ builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 builder.Services.AddScoped<IPersonalTasksRepository, PersonalTasksRepository>();
 
 builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
-
+builder.Services.AddScoped<UserHelper>();
 
 var app = builder.Build();
 
