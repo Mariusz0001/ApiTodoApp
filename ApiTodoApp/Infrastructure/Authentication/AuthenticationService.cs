@@ -62,7 +62,8 @@ namespace ApiTodoApp.Infrastructure.Authentication
             var authClaims = new ClaimsIdentity(new[]
         {
             new Claim("Name", user.UserName),
-            new Claim("Email", user.Email)
+            new Claim("Email", user.Email),
+            new Claim("Id", user.Id)
         });
 
 
