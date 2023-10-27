@@ -47,6 +47,27 @@ namespace ApiTodoApp.Controllers
             return response?.Count() > 0 ? _mapper.Map<IEnumerable<PersonalTaskDto>>(response) : new List<PersonalTaskDto>();
         }
 
+        [HttpGet("byId/{id}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<ActionResult<PersonalTaskDto>> GetByIdAsync([FromRoute] string id)
+        {
+            _logger.LogInformation("METHOD: GET, PersonalTasksController");//todo loging request response
+
+            _ = Guid.TryParse(id, out var guid);
+
+            if (guid == Guid.Empty)
+                return BadRequest("Wrong id");
+
+            var response = _repository.GetById(Guid.Parse(id), await _userHelper.GetUser(User));
+
+            if (response is not null)
+                return Ok(_mapper.Map<PersonalTaskDto>(response));
+
+            return NotFound();
+        }
+
 
         [HttpPost("add")]
         public async Task<Guid> AddTaskAsync([FromBody] AddTaskDto addTaskDto)

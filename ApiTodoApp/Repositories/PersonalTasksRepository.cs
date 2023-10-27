@@ -18,6 +18,9 @@ namespace ApiTodoApp.Repositories
             return personalTasks is not null ? personalTasks.OrderByDescending(p => p.CreationDate).ThenByDescending(p => p.Status) : null;
         }
 
+        public PersonalTask? GetById(Guid id, string userId) =>
+            DbContext.PersonalTasks?.First(p => p.Id == id && p.userId == userId);
+
         public IQueryable<PersonalTask>? GetByType(string type, string userId)
         {
             var personalTasks = Get(userId);

@@ -7,6 +7,7 @@ namespace ApiTodoApp.Repositories
     {
         IQueryable<PersonalTask>? Get(string userId);
         IQueryable<PersonalTask>? GetByType(string type, string userId);
+        PersonalTask? GetById(Guid id, string userId);
         Guid Add(AddTaskDto dto, string userId);
         void Move(MoveTaskDto dto, string userId);
         void Edit(EditTaskDto dto, string userId);
