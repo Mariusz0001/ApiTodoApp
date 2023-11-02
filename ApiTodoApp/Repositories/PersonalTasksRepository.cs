@@ -34,6 +34,12 @@ namespace ApiTodoApp.Repositories
                 .Where(p => p.CreatedBy == userId && p.Status == type) : null;
         }
 
+        public IQueryable<UserStatsDto>? GetUserStats(string userId) =>
+            DbContext.PersonalTasks?
+               .Where(p => p.UserId == userId)
+               .GroupBy(task => task.Status)
+               .Select(group => new UserStatsDto(group.Key.ToString(), group.Count()));
+
         public Guid Add(AddTaskDto dto, string userId)
         {
             var id = Guid.NewGuid();

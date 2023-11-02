@@ -68,6 +68,22 @@ namespace ApiTodoApp.Controllers
             return NotFound();
         }
 
+        [HttpGet("userStats")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<ActionResult<IEnumerable<UserStatsDto>>> UserStats()
+        {
+            _logger.LogInformation("METHOD: GET, PersonalTasksController");//todo loging request response
+
+            var response = _repository.GetUserStats(await _userHelper.GetUser(User));
+
+            if (response is not null)
+                return Ok(response);
+
+            return NotFound();
+        }
+
 
         [HttpPost("add")]
         public async Task<Guid> AddTaskAsync([FromBody] AddTaskDto addTaskDto)
