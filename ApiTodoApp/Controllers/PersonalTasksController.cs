@@ -33,7 +33,7 @@ namespace ApiTodoApp.Controllers
         public async Task<IEnumerable<PersonalTaskDto>> Get()
         {
             _logger.LogInformation("METHOD: GET, PersonalTasksController");//todo loging request response
-            var response = _repository.Get(await _userHelper.GetUser(User))?.ToList();
+            var response = _repository.Get(await _userHelper.GetUserId(User))?.ToList();
 
             return response?.Count > 0 ? response : new List<PersonalTaskDto>();
         }
@@ -42,7 +42,7 @@ namespace ApiTodoApp.Controllers
         public async Task<IEnumerable<PersonalTaskDto>> GetAsync([FromRoute] string type)
         {
             _logger.LogInformation("METHOD: GET, PersonalTasksController");//todo loging request response
-            var response = _repository.GetByType(type, await _userHelper.GetUser(User));
+            var response = _repository.GetByType(type, await _userHelper.GetUserId(User));
 
             return response?.Count() > 0 ? response : new List<PersonalTaskDto>();
         }
@@ -60,7 +60,7 @@ namespace ApiTodoApp.Controllers
             if (guid == Guid.Empty)
                 return BadRequest("Wrong id");
 
-            var response = _repository.GetById(Guid.Parse(id), await _userHelper.GetUser(User))?.FirstOrDefault();
+            var response = _repository.GetById(Guid.Parse(id), await _userHelper.GetUserId(User))?.FirstOrDefault();
 
             if (response is not null)
                 return Ok(_mapper.Map<PersonalTaskDto>(response));
@@ -76,7 +76,7 @@ namespace ApiTodoApp.Controllers
         {
             _logger.LogInformation("METHOD: GET, PersonalTasksController");//todo loging request response
 
-            var response = _repository.GetUserStats(await _userHelper.GetUser(User));
+            var response = _repository.GetUserStats(await _userHelper.GetUserId(User));
 
             if (response is not null)
                 return Ok(response);
@@ -90,7 +90,7 @@ namespace ApiTodoApp.Controllers
         {
             _logger.LogInformation("METHOD: POST, PersonalTasksController");//todo loging request response
 
-            var id = _repository.Add(addTaskDto, await _userHelper.GetUser(User));
+            var id = _repository.Add(addTaskDto, await _userHelper.GetUserId(User));
 
             return id;
         }
@@ -100,21 +100,21 @@ namespace ApiTodoApp.Controllers
         public async Task MoveTaskAsync([FromBody] MoveTaskDto dto)
         {
             _logger.LogInformation("METHOD: POST, PersonalTasksController");//todo loging request response
-            _repository.Move(dto, await _userHelper.GetUser(User));
+            _repository.Move(dto, await _userHelper.GetUserId(User));
         }
 
         [HttpPost("edit")]
         public async Task EditTaskAsync([FromBody] EditTaskDto dto)
         {
             _logger.LogInformation("METHOD: POST, PersonalTasksController");//todo loging request response
-            _repository.Edit(dto, await _userHelper.GetUser(User));
+            _repository.Edit(dto, await _userHelper.GetUserId(User));
         }
 
         [HttpPost("edit-details")]
         public async Task EditDetailsTaskAsync([FromBody] EditDetailsTaskDto dto)
         {
             _logger.LogInformation("METHOD: POST, PersonalTasksController");//todo loging request response
-            _repository.EditDetails(dto, await _userHelper.GetUser(User));
+            _repository.EditDetails(dto, await _userHelper.GetUserId(User));
         }
     }
 }
