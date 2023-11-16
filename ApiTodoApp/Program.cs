@@ -30,15 +30,20 @@ builder.Services.AddAuthentication(options =>
     options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
     options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
 }).AddJwtBearer(options => options.TokenValidationParameters =
-    new Microsoft.IdentityModel.Tokens.TokenValidationParameters
+     new TokenValidationParameters
+     {
+         ValidateIssuer = true,
+         ValidateLifetime = true,
+         ValidateAudience = true,
+         ValidateIssuerSigningKey = true,
+         ValidIssuer = authSecrets.Issuer,
+         ValidAudience = authSecrets.Audience,
+         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(authSecrets.SigningKey))
+     }
+).AddJwtBearer("Google", options =>
     {
-        ValidateIssuer = true,
-        ValidateLifetime = true,
-        ValidateAudience = true,
-        ValidateIssuerSigningKey = true,
-        ValidIssuer = authSecrets.Issuer,
-        ValidAudience = authSecrets.Audience,
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(authSecrets.SigningKey))
+        options.Authority = "https://accounts.google.com";
+        options.Audience = authSecrets.GoogleClientId;
     });
 
 builder.Services.AddControllers();
