@@ -68,7 +68,7 @@ namespace ApiTodoApp.Infrastructure.Authentication
             return token;
         }
 
-        public async Task<string> LoginWithProvider(Provider provider, string token)
+        public async Task<LoginWithProviderResponseDto> LoginWithProvider(Provider provider, string token)
         {
             switch (provider)
             {
@@ -92,12 +92,12 @@ namespace ApiTodoApp.Infrastructure.Authentication
                         if (user is null)
                             user = await RegisterUser(authDto.Email, authDto.Name, null);
 
-                        return GenerateToken(new ClaimsIdentity(new[]
+                        return new LoginWithProviderResponseDto(GenerateToken(new ClaimsIdentity(new[]
                         {
                             new Claim("Name", user.UserName),
                             new Claim("Email", user.Email),
                             new Claim("Id", user.Id)
-                        }));
+                        })), authDto.Picture);
                     }
                 default: throw new NotImplementedException($"Logging by the provider {provider} has been not implemented.");
             }

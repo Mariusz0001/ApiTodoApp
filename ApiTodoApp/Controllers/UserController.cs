@@ -91,7 +91,7 @@ namespace ApiTodoApp.Controllers
             {
                 var result = await _authenticationService.LoginWithProvider(AuthenticationService.Provider.Google, request.TokenId);
 
-                if (string.IsNullOrEmpty(result))
+                if (string.IsNullOrEmpty(result?.Token))
                     return BadRequest("Cannot authenticate user with google provider");
 
                 return Ok(result);
