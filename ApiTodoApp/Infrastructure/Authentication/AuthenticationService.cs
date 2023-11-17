@@ -1,6 +1,8 @@
-﻿using ApiTodoApp.Model.User;
+﻿using ApiTodoApp.Model;
+using ApiTodoApp.Model.User;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
+using Newtonsoft.Json;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
@@ -9,13 +11,20 @@ namespace ApiTodoApp.Infrastructure.Authentication
 {
     public class AuthenticationService : IAuthenticationService
     {
+        public enum Provider
+        {
+            Google
+        }
+
         private readonly UserManager<User> _userManager;
         private readonly AuthSecrets _authSecrets;
+        private readonly IHttpClientFactory _httpClientFactory;
 
-        public AuthenticationService(UserManager<User> userManager, AuthSecrets secrets)
+        public AuthenticationService(UserManager<User> userManager, AuthSecrets secrets, IHttpClientFactory httpClientFactory)
         {
             _userManager = userManager;
             _authSecrets = secrets;
+            _httpClientFactory = httpClientFactory;
         }
 
         public async Task<string> Register(RegisterRequest request)
@@ -28,19 +37,7 @@ namespace ApiTodoApp.Infrastructure.Authentication
             if (userByUsername is not null)
                 throw new ArgumentException($"Username { request.UserName} is already taken.");
 
-            User user = new()
-            {
-                Email = request.Email,
-                UserName = request.UserName,
-                SecurityStamp = Guid.NewGuid().ToString()
-            };
-
-            var result = await _userManager.CreateAsync(user, request.Password);
-
-            if (!result.Succeeded)
-            {
-                throw new ArgumentException($"Unable to register user {request.UserName} errors: {GetErrorsText(result.Errors)}");
-            }
+            await RegisterUser(request.Email, request.UserName, request.Password);
 
             return await Login(new LoginRequest { Username = request.UserName, Password = request.Password });
         }
@@ -66,12 +63,62 @@ namespace ApiTodoApp.Infrastructure.Authentication
             new Claim("Id", user.Id)
         });
 
-
-            var tokenHandler = new JwtSecurityTokenHandler();
             var token = GenerateToken(authClaims);
 
-
             return token;
+        }
+
+        public async Task<string> LoginWithProvider(Provider provider, string token)
+        {
+            switch (provider)
+            {
+                case Provider.Google:
+                    {
+                        var httpClient = _httpClientFactory.CreateClient("Google");
+
+                        var result = await httpClient.GetAsync($"oauth2/v3/tokeninfo?id_token={token}");
+                        result.EnsureSuccessStatusCode();
+
+                        var authDto = JsonConvert.DeserializeObject<GoogleAuthDto>(await result.Content.ReadAsStringAsync());
+
+                        if (authDto is null)
+                            throw new NullReferenceException("Cannot convert response from google on an object");
+
+                        if (authDto.Aud != _authSecrets.GoogleClientId)
+                            throw new Exception("Unauthorized token");
+
+                        var user = await _userManager.FindByEmailAsync(authDto.Email);
+
+                        if (user is null)
+                            user = await RegisterUser(authDto.Email, authDto.Name, null);
+
+                        return GenerateToken(new ClaimsIdentity(new[]
+                        {
+                            new Claim("Name", user.UserName),
+                            new Claim("Email", user.Email),
+                            new Claim("Id", user.Id)
+                        }));
+                    }
+                default: throw new NotImplementedException($"Logging by the provider {provider} has been not implemented.");
+            }
+        }
+
+        private async Task<User> RegisterUser(string email, string name, string? password)
+        {
+            User newUser = new()
+            {
+                Email = email,
+                UserName = name,
+                SecurityStamp = Guid.NewGuid().ToString()
+            };
+
+            var result = password is null ? await _userManager.CreateAsync(newUser) : await _userManager.CreateAsync(newUser, password);
+
+            if (!result.Succeeded)
+                throw new ArgumentException($"Unable to register user {name} errors: {GetErrorsText(result.Errors)}");
+
+            var user = await _userManager.FindByEmailAsync(email);
+            return user;
         }
 
         private string GenerateToken(ClaimsIdentity authClaims)

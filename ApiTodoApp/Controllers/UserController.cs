@@ -13,12 +13,15 @@ namespace ApiTodoApp.Controllers
     {
         private readonly IAuthenticationService _authenticationService;
         private readonly UserHelper _userHelper;
+        private readonly ILogger<UserController> _logger;
 
         public UserController(IAuthenticationService authenticationService,
-            UserHelper userHelper)
+            UserHelper userHelper,
+            ILogger<UserController> logger)
         {
             _authenticationService = authenticationService;
             _userHelper = userHelper;
+            _logger = logger;
         }
 
         [AllowAnonymous]
@@ -36,6 +39,7 @@ namespace ApiTodoApp.Controllers
             }
             catch (ArgumentException aex)
             {
+                _logger.LogError(aex.ToString());
                 return BadRequest(new ErrorDto(aex.Message));
             }
         }
@@ -54,6 +58,7 @@ namespace ApiTodoApp.Controllers
             }
             catch (ArgumentException aex)
             {
+                _logger.LogError(aex.ToString());
                 return BadRequest(new ErrorDto(aex.Message));
             }
         }
@@ -72,8 +77,31 @@ namespace ApiTodoApp.Controllers
             }
             catch (ArgumentException aex)
             {
+                _logger.LogError(aex.ToString());
                 return BadRequest(new ErrorDto(aex.Message));
             }
+        }
+
+
+        [AllowAnonymous]
+        [HttpPost("google")]
+        public async Task<IActionResult> Google([FromBody] LoginProviderRequest request)
+        {
+            try
+            {
+                var result = await _authenticationService.LoginWithProvider(AuthenticationService.Provider.Google, request.TokenId);
+
+                if (string.IsNullOrEmpty(result))
+                    return BadRequest("Cannot authenticate user with google provider");
+
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.ToString());
+                BadRequest(ex.Message);
+            }
+            return BadRequest();
         }
     }
 }

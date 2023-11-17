@@ -38,13 +38,8 @@ builder.Services.AddAuthentication(options =>
          ValidateIssuerSigningKey = true,
          ValidIssuer = authSecrets.Issuer,
          ValidAudience = authSecrets.Audience,
-         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(authSecrets.SigningKey))
-     }
-).AddJwtBearer("Google", options =>
-    {
-        options.Authority = "https://accounts.google.com";
-        options.Audience = authSecrets.GoogleClientId;
-    });
+         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(authSecrets.SigningKey!))
+     });
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
@@ -71,12 +66,18 @@ builder.Services.AddCors(options =>
     });
 });
 
+builder.Services.AddHttpClient("Google", client =>
+{
+    client.BaseAddress = new Uri("https://www.googleapis.com/");
+});
+
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
 builder.Services.AddScoped<IPersonalTasksRepository, PersonalTasksRepository>();
 
 builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
 builder.Services.AddScoped<UserHelper>();
+
 
 var app = builder.Build();
 
