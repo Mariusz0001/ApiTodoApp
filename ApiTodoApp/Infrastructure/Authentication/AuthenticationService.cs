@@ -17,12 +17,14 @@ namespace ApiTodoApp.Infrastructure.Authentication
         }
 
         private readonly UserManager<User> _userManager;
+        private readonly IUserNameManager _userNameManager;
         private readonly AuthSecrets _authSecrets;
         private readonly IHttpClientFactory _httpClientFactory;
 
-        public AuthenticationService(UserManager<User> userManager, AuthSecrets secrets, IHttpClientFactory httpClientFactory)
+        public AuthenticationService(UserManager<User> userManager, IUserNameManager userNameManager, AuthSecrets secrets, IHttpClientFactory httpClientFactory)
         {
             _userManager = userManager;
+            _userNameManager = userNameManager;
             _authSecrets = secrets;
             _httpClientFactory = httpClientFactory;
         }
@@ -90,7 +92,7 @@ namespace ApiTodoApp.Infrastructure.Authentication
                         var user = await _userManager.FindByEmailAsync(authDto.Email);
 
                         if (user is null)
-                            user = await RegisterUser(authDto.Email, authDto.Name, null);
+                            user = await RegisterUser(authDto);
 
                         return new LoginWithProviderResponseDto(GenerateToken(new ClaimsIdentity(new[]
                         {
@@ -101,6 +103,18 @@ namespace ApiTodoApp.Infrastructure.Authentication
                     }
                 default: throw new NotImplementedException($"Logging by the provider {provider} has been not implemented.");
             }
+        }
+
+        private async Task<User> RegisterUser(GoogleAuthDto authDto)
+        {
+            var foundUser = await _userManager.FindByNameAsync(authDto.Name);
+
+            var userName = authDto.Name;
+
+            if (foundUser is not null)
+                userName = await _userNameManager.GenerateNewUsernameAsync(authDto.Name);
+
+            return await RegisterUser(authDto.Email, userName, null);
         }
 
         private async Task<User> RegisterUser(string email, string name, string? password)

@@ -77,6 +77,7 @@ builder.Services.AddScoped<IPersonalTasksRepository, PersonalTasksRepository>();
 
 builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
 builder.Services.AddScoped<UserHelper>();
+builder.Services.AddScoped<IUserNameManager, UserNameManager>();
 
 
 var app = builder.Build();
