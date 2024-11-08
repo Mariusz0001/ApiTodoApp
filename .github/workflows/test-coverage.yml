@@ -1,13 +1,13 @@
 on:
   pull_request:
-
+    branches:
+      - master
+      - develop
 jobs:
   coverage:
     runs-on: ubuntu-latest
     steps:
-      - name: Test and generate coverage
       - uses: 5monkeys/cobertura-action@master
         with:
-          path: path/to/coverage.xml
-          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          path: src/test.xml
           minimum_coverage: 30
