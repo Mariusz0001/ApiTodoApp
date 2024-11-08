@@ -20,7 +20,7 @@
 
         public string Name { get; set; }
         public PersonalTaskStatus Status { get; set; }
-        public PersonalTaskPriority Priority { get; set; }
+        public PersonalTaskPriority? Priority { get; set; }
         public string? Description { get; set; }
 
     }

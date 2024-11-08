@@ -3,7 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.1.32407.343
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ApiTodoApp", "ApiTodoApp\ApiTodoApp.csproj", "{5B49375C-6C43-4B2F-AF18-BF07F7F3CF98}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ApiTodoApp", "ApiTodoApp\ApiTodoApp.csproj", "{5B49375C-6C43-4B2F-AF18-BF07F7F3CF98}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ApiTodoApp.UnitTests", "ApiTodoApp.UnitTests\ApiTodoApp.UnitTests.csproj", "{5C6458FF-FB4D-433D-AC56-2AF6D37D6C72}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +17,10 @@ Global
 		{5B49375C-6C43-4B2F-AF18-BF07F7F3CF98}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5B49375C-6C43-4B2F-AF18-BF07F7F3CF98}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5B49375C-6C43-4B2F-AF18-BF07F7F3CF98}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5C6458FF-FB4D-433D-AC56-2AF6D37D6C72}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5C6458FF-FB4D-433D-AC56-2AF6D37D6C72}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5C6458FF-FB4D-433D-AC56-2AF6D37D6C72}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5C6458FF-FB4D-433D-AC56-2AF6D37D6C72}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

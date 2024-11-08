@@ -17,14 +17,14 @@ namespace ApiTodoApp.Repositories
             var personalTasks = DbContext.PersonalTasks?.Where(p => p.UserId == userId)
                 .OrderByDescending(p => p.CreationDate)
                 .ThenByDescending(p => p.Status)
-                .Select(p => new PersonalTaskDto(p.Id, p.Name, p.CreationDate, DbContext.Users.First(u => u.Id == p.UserId).UserName, p.Status.ToString(), p.Priority.ToString(), p.Description));
+                .Select(p => new PersonalTaskDto(p.Id, p.Name, p.CreationDate, DbContext.Users.First(u => u.Id == p.UserId).UserName, p.Status.ToString(), p.Priority.HasValue ? p.Priority.Value.ToString() : "", p.Description));
             return personalTasks;
         }
 
         public IQueryable<PersonalTaskDto>? GetById(Guid id, string userId) =>
             DbContext.PersonalTasks?
                 .Where(p => p.Id == id && p.UserId == userId)
-                .Select(p => new PersonalTaskDto(p.Id, p.Name, p.CreationDate, DbContext.Users.First(u => u.Id == p.UserId).UserName, p.Status.ToString(), p.Priority.ToString(), p.Description));
+                .Select(p => new PersonalTaskDto(p.Id, p.Name, p.CreationDate, DbContext.Users.First(u => u.Id == p.UserId).UserName, p.Status.ToString(), p.Priority.HasValue ? p.Priority.Value.ToString() : "", p.Description));
 
 
         public IQueryable<PersonalTaskDto>? GetByType(string type, string userId)
@@ -85,7 +85,9 @@ namespace ApiTodoApp.Repositories
             personalTask.Name = dto.Name;
             personalTask.Description = dto.Description;
             personalTask.Status = (PersonalTaskStatus)Enum.Parse(typeof(PersonalTaskStatus), dto.Status);
-            personalTask.Priority = (PersonalTaskPriority)Enum.Parse(typeof(PersonalTaskPriority), dto.Priority);
+
+            if (dto.Priority is not null)
+                personalTask.Priority = (PersonalTaskPriority)Enum.Parse(typeof(PersonalTaskPriority), dto.Priority);
 
             DbContext.PersonalTasks?.Update(personalTask);
             DbContext.SaveChanges();

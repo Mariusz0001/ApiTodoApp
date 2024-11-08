@@ -6,5 +6,6 @@
         public string? Audience { get; init; }
         public double ExpirationSeconds { get; init; }
         public string? SigningKey { get; init; }
+        public string? GoogleClientId { get; init; }
     }
 }
